@@ -1,0 +1,17 @@
+[package]
+name = "useful"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Macros to mark code and imports as used, avoiding #[warn(dead_code)]"
+repository.workspace = true
+license.workspace = true
+keywords = ["dead-code", "docs", "import", "unused", "useful"]
+categories = ["development-tools", "no-std", "no-std::no-alloc", "rust-patterns"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = []
