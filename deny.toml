@@ -17,6 +17,7 @@ allow = [
 private.ignore = true
 
 [bans]
+allow-wildcard-paths = true
 multiple-versions = "warn"
 wildcards = "warn"
 workspace-default-features = "allow"

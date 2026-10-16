@@ -1,0 +1,17 @@
+error: allow(unused) incompatible with previous forbid
+ --> tests/trybuild/fail/forbid_unused.rs:9:1
+  |
+6 | #![forbid(unused)]
+  |           ------ `forbid` level set here
+...
+9 | useful::used!(foo);
+  | ^^^^^^^^^^^^^^^^^^ overruled by previous forbid
+  |
+  = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
+  = note: for more information, see issue #81670 <https://github.com/rust-lang/rust/issues/81670>
+note: the lint level is defined here
+ --> tests/trybuild/fail/forbid_unused.rs:5:9
+  |
+5 | #![deny(forbidden_lint_groups)]
+  |         ^^^^^^^^^^^^^^^^^^^^^
+  = note: this error originates in the macro `useful::used` (in Nightly builds, run with -Z macro-backtrace for more info)

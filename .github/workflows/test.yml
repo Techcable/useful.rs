@@ -52,6 +52,11 @@ jobs:
         with:
           tool: cargo-nextest
       - uses: Swatinem/rust-cache@v2
+      - name: Exclude crates requiring newer rust
+        if: ${{ contains(matrix.rust, '1.') }}
+        # useful-uitests has a much higher rust-version than the rest of the workspace
+        run: |
+          echo "EXCLUDE_ARGS=--exclude useful-uitests" >> "$GITHUB_ENV"
       - name: Pin MSRV-compatible versions
         if: ${{ contains(matrix.rust, '1.') }}  # ignored for non-pinned versions
         env:
@@ -64,11 +69,11 @@ jobs:
         # NOTE: Running --all-targets actually excludes doc tests. See rust-lang/cargo#6669
         # The `--all` flag is equivalent to `--workspace`
         run: |
-          cargo nextest run --workspace --verbose --no-default-features --features "${{ matrix.features }}"
+          cargo nextest run --workspace $EXCLUDE_ARGS --verbose --no-default-features --features "${{ matrix.features }}"
       # nextest doesn't support doctests (https://github.com/nextest-rs/nextest/issues/16)
       - name: Doctests
         run: |
-          cargo test --doc --workspace --verbose --no-default-features --features "${{ matrix.features }}"
+          cargo test --doc --workspace $EXCLUDE_ARGS --verbose --no-default-features --features "${{ matrix.features }}"
 
   clippy:
     # Only run on PRs if the source branch is on someone else's repo

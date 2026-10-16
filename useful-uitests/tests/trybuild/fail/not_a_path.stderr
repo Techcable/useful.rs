@@ -1,0 +1,7 @@
+error: no rules expected `1`
+ --> tests/trybuild/fail/not_a_path.rs:1:15
+  |
+1 | useful::used!(1 + 2);
+  |               ^ no rules expected this token in macro call
+  |
+  = note: while trying to match end of macro

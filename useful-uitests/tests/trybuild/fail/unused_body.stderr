@@ -1,0 +1,12 @@
+error: unused variable: `x`
+ --> tests/trybuild/fail/unused_body.rs:5:9
+  |
+5 |     let x = 3;
+  |         ^ help: if this is intentional, prefix it with an underscore: `_x`
+  |
+note: the lint level is defined here
+ --> tests/trybuild/fail/unused_body.rs:2:9
+  |
+2 | #![deny(unused)]
+  |         ^^^^^^
+  = note: `#[deny(unused_variables)]` implied by `#[deny(unused)]`

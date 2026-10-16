@@ -1,0 +1,27 @@
+[package]
+name = "useful-uitests"
+version = "0.0.0"
+authors.workspace = true
+edition.workspace = true
+# recent trybuild requires 1.88
+rust-version = "1.88"
+description = "UI tests for the useful crate, which need a newer rust version"
+repository.workspace = true
+license.workspace = true
+publish = false
+
+[package.metadata.cargo-shear]
+# trybuild builds the regular dependencies of this crate for the test cases to use
+ignored = ["useful"]
+# test cases are compiled separately by trybuild
+ignored-paths = ["tests/trybuild/**/*.rs"]
+
+[dependencies]
+useful = { path = "../useful" }
+
+[dev-dependencies]
+rustversion = "1"
+trybuild = "1"
+
+[lints]
+workspace = true
