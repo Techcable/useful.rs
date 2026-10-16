@@ -55,8 +55,12 @@ jobs:
       - name: Exclude crates requiring newer rust
         if: ${{ contains(matrix.rust, '1.') }}
         # useful-uitests has a much higher rust-version than the rest of the workspace
+        # claude came up with the $EXCLUDE_ARGS idea, but that wasn't enough for ui_test
+        # due to some edition 2024 dependencies.
+        # I needed to remove the ui_test dependency and do this before generating the lockfile
         run: |
           echo "EXCLUDE_ARGS=--exclude useful-uitests" >> "$GITHUB_ENV"
+          cargo +stable remove -p useful-uitests --dev ui_test
       - name: Pin MSRV-compatible versions
         if: ${{ contains(matrix.rust, '1.') }}  # ignored for non-pinned versions
         env:

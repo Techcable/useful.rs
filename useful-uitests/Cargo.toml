@@ -14,7 +14,11 @@ publish = false
 # trybuild builds the regular dependencies of this crate for the test cases to use
 ignored = ["useful"]
 # test cases are compiled separately by trybuild
-ignored-paths = ["tests/trybuild/**/*.rs"]
+ignored-paths = ["tests/trybuild/**/*.rs", "tests/ui_test/**/*.rs"]
+
+[[test]]
+harness = false
+name = "cfg_test"
 
 [dependencies]
 useful = { path = "../useful" }
@@ -22,6 +26,7 @@ useful = { path = "../useful" }
 [dev-dependencies]
 rustversion = "1"
 trybuild = "1"
+ui_test = "0.30"
 
 [lints]
 workspace = true
