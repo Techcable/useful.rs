@@ -12,6 +12,18 @@ Most changes include the relevant [jj](https://jj-vcs.dev) change ids in parens.
 
 ## Unreleased
 
+### Added
+- Support associated functions, methods, and constants in `used!` with a `let` prefix, as in `used!(let Foo::new)`. (ymxposuv)
+  - These cannot be imported with `use`, so they previously failed with "`Foo` is a struct, not a module".
+- Allow an explicit `use` prefix for paths that are imported, as in `used!(use Debug, let Foo::new)`. (ymxposuv)
+  - For compatibility, paths without a prefix are still imported with `use` (but this is deprecated, see below).
+
+### Deprecated
+- Deprecated paths without a `use` or `let` prefix in `used!`. (ymxposuv)
+  - For compatibility, they still behave as if prefixed with `use`.
+  - Support for this will be removed in version v0.2.0
+  - Cannot be marked `#[deprecated(...)]` due to macro limitations.
+
 ## v0.1.1 - 2026-10-16
 Add `used_for_tests!` macro.
 

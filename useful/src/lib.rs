@@ -6,7 +6,7 @@
 //! ```
 //! #[deny(warnings)]
 //! use core::fmt::Debug;
-//! useful::used!(Debug);
+//! useful::used!(use Debug);
 //! ```
 //!
 //! When used with functions, it is more precise than `#[allow(unused)]` and avoids
@@ -17,8 +17,34 @@
 //! fn foo() {
 //!     let x = 3;
 //! }
-//! useful::used!(foo);
+//! useful::used!(use foo);
 //! ```
+//!
+//! # Prefixes
+//! Each path must be prefixed with either `use` or `let`,
+//! which determines how it is marked as used:
+//! - `use path` imports the path, expanding to `use path as _;`.
+//!   This works for anything that can be imported,
+//!   including modules, types, traits, functions, and constants.
+//! - `let path` references the path as a value, expanding to `let _ = path;`.
+//!   This is needed for associated functions, methods, and associated constants,
+//!   because they cannot be imported with `use`.
+//!
+//! ```
+//! #![deny(unused)]
+//! use core::fmt::Debug;
+//!
+//! struct Foo;
+//! impl Foo {
+//!     fn new() -> Self {
+//!         Foo
+//!     }
+//! }
+//! useful::used!(use Debug, use Foo, let Foo::new);
+//! ```
+//!
+//! Paths without a prefix are deprecated, and are treated as if they were prefixed with `use`.
+//! Support will be removed in v0.2.0. They are not marked `#[deprecated]` due to macro limitations.
 //!
 //! # Documentation-Only Imports
 //! Currently, rustc will warn about unused imports if those imports are only used in doc comments.
@@ -27,7 +53,7 @@
 //! ```
 //! #![deny(unused_imports)]
 //! use std::collections::HashMap;
-//! useful::used_for_docs!(HashMap);
+//! useful::used_for_docs!(use HashMap);
 //!
 //! /// This is almost as awesome as a [`HashMap`]
 //! struct AwesomeStruct(u32, u32);
@@ -37,8 +63,41 @@
 /// Mark the specified paths as being used,
 /// avoiding lints for dead code or unused imports.
 ///
+/// Accepts a comma-separated list of paths, each prefixed with `use` or `let`:
+/// ```
+/// #![deny(unused)]
+/// use core::fmt::Debug;
+///
+/// struct Foo;
+/// impl Foo {
+///     const BAR: u32 = 3;
+///     fn new() -> Self {
+///         Foo
+///     }
+/// }
+/// useful::used!(use Debug, use Foo, let Foo::new, let Foo::BAR);
+/// ```
+///
+/// # Prefixes
+/// ## `use path`
+/// Imports the path, expanding to `#[allow(unused)] use path as _;`.
+/// This works for anything that can be imported,
+/// including modules, types, traits, functions, and constants.
+///
+/// ## `let path`
+/// References the path as a value, expanding to `let _ = path;`.
+/// This is needed for associated functions, methods, and associated constants,
+/// because they cannot be imported with `use`.
+///
+/// Generic functions need explicit type arguments, such as `let Vec::<u8>::new`.
+///
+/// ## Unprefixed paths (deprecated)
+/// Paths without a prefix are deprecated,
+/// and are treated as if they were prefixed with `use`.
+/// Support for unprefixed paths will be removed in version v0.2.0.
+///
 /// # Advantages
-/// This is more precise than applying `#[allow(unused)]` because
+/// This is more precise than applying `#[allow(unused)]` to an item because
 /// it only applies to the function/struct directly and not its children.
 ///
 /// For example, this following code succeeds without warning or error
@@ -58,7 +117,7 @@
 /// fn foo() {
 ///     let x = 3;
 /// }
-/// useful::used!(foo);
+/// useful::used!(use foo);
 /// ```
 ///
 /// # Limitations
@@ -68,11 +127,40 @@
 /// Cannot work with `#[forbid(unused)]`.
 #[macro_export]
 macro_rules! used {
+    // implementation detail, which processes one item at a time
+    (@impl) => {};
+    (@impl let $x:path $(, $($rest:tt)*)?) => {
+        // Before Rust 1.89, the dead code lint ignored the body of `const _`,
+        // but it has always treated items with `#[allow(dead_code)]` as used.
+        // The block gives each generated function its own scope, avoiding name conflicts.
+        {
+            #[allow(unused)]
+            fn __useful_let_used() {
+                let _ = $x;
+            }
+        }
+        $($crate::used!(@impl $($rest)*);)?
+    };
+    (@impl use $x:path $(, $($rest:tt)*)?) => {
+        $crate::used!(@impl $x $(, $($rest)*)?);
+    };
+    (@impl $x:path $(, $($rest:tt)*)?) => {
+        #[allow(unused)]
+        use $x as _;
+        $($crate::used!(@impl $($rest)*);)?
+    };
+    // must not fall through to the catch-all branch below, which would recurse forever
+    (@impl $($invalid:tt)+) => {
+        compile_error!(concat!(
+            "expected a path, optionally prefixed by `let` or `use`, found `",
+            stringify!($($invalid)+),
+            "`",
+        ));
+    };
     () => {};
-    ($($x:path),+ $(,)?) => {
+    ($($items:tt)+) => {
         const _: () = {
-            $(#[allow(unused)]
-            use $x as _;)*
+            $crate::used!(@impl $($items)+);
         };
     };
 }
@@ -81,12 +169,13 @@ macro_rules! used {
 ///
 /// Behaves exactly the same as [`used!`],
 /// but with a different name for clarity of purpose.
+/// Paths should be prefixed with `use` or `let`, as described in [`used!`].
 ///
 /// # Example
 /// ```
 /// #![deny(unused_imports)]
 /// use std::collections::HashMap;
-/// useful::used_for_docs!(HashMap);
+/// useful::used_for_docs!(use HashMap);
 ///
 /// /// This is almost as awesome as a [`HashMap`]
 /// struct AwesomeStruct(u32, u32);
@@ -97,6 +186,22 @@ pub use crate::used as used_for_docs;
 ///
 /// Expands to [`used!`] if and only if `#[cfg(not(test))]` is true,
 /// meaning you will get warnings if the code is not actually used in tests.
+/// Paths should be prefixed with `use` or `let`, as described in [`used!`].
+///
+/// # Example
+/// ```
+/// #![deny(unused)]
+///
+/// struct Foo;
+/// impl Foo {
+///     fn new() -> Self {
+///         Foo
+///     }
+/// }
+/// // only called from `#[cfg(test)]` code
+/// fn helper() {}
+/// useful::used_for_tests!(use helper, let Foo::new);
+/// ```
 #[macro_export]
 macro_rules! used_for_tests {
     ($($x:tt)*) => {
@@ -111,11 +216,11 @@ mod test {
     fn unused_imports() {
         use std::collections::HashMap;
         use std::hash::Hash;
-        used!(HashMap, Hash);
+        used!(use HashMap, use Hash);
     }
     #[test]
     fn unused_functions() {
         fn unused() {}
-        used!(unused);
+        used!(use unused);
     }
 }

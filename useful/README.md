@@ -15,7 +15,7 @@ The following code gives no warnings, even though `Debug` is not used in the pro
 ```rust
 #[deny(warnings)]
 use core::fmt::Debug;
-useful::used!(Debug);
+useful::used!(use Debug);
 ```
 
 When used with functions, it is more precise than `#[allow(unused)]` and avoids
@@ -26,8 +26,34 @@ without warning about the unused function `foo`.
 fn foo() {
     let x = 3;
 }
-useful::used!(foo);
+useful::used!(use foo);
 ```
+
+## Prefixes
+Each path must be prefixed with either `use` or `let`,
+which determines how it is marked as used:
+- `use path` imports the path, expanding to `use path as _;`.
+  This works for anything that can be imported,
+  including modules, types, traits, functions, and constants.
+- `let path` references the path as a value, expanding to `let _ = path;`.
+  This is needed for associated functions, methods, and associated constants,
+  because they cannot be imported with `use`.
+
+```rust
+#![deny(unused)]
+use core::fmt::Debug;
+
+struct Foo;
+impl Foo {
+    fn new() -> Self {
+        Foo
+    }
+}
+useful::used!(use Debug, use Foo, let Foo::new);
+```
+
+Paths without a prefix are deprecated, and are treated as if they were prefixed with `use`.
+Support will be removed in v0.2.0. They are not marked `#[deprecated]` due to macro limitations.
 
 ## Documentation-Only Imports
 Currently, rustc will warn about unused imports if those imports are only used in doc comments.
@@ -36,7 +62,7 @@ It works exactly the same as [`used!`](https://docs.rs/useful/latest/useful/macr
 ```rust
 #![deny(unused_imports)]
 use std::collections::HashMap;
-useful::used_for_docs!(HashMap);
+useful::used_for_docs!(use HashMap);
 
 /// This is almost as awesome as a [`HashMap`]
 struct AwesomeStruct(u32, u32);

@@ -1,7 +1,7 @@
-error: no rules expected `1`
- --> tests/trybuild/fail/not_a_path.rs:1:15
+error: expected a path, optionally prefixed by `let` or `use`, found `1 + 2`
+ --> tests/trybuild/fail/not_a_path.rs:1:1
   |
 1 | useful::used!(1 + 2);
-  |               ^ no rules expected this token in macro call
+  | ^^^^^^^^^^^^^^^^^^^^
   |
-  = note: while trying to match end of macro
+  = note: this error originates in the macro `$crate::used` which comes from the expansion of the macro `useful::used` (in Nightly builds, run with -Z macro-backtrace for more info)
