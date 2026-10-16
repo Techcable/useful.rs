@@ -12,6 +12,9 @@ Most changes include the relevant [jj](https://jj-vcs.dev) change ids in parens.
 
 ## Unreleased
 
+### Added
+- Provide `used_for_tests!` macro, which marks items as used only on `#[cfg(not(test))]`. (qxuoyvst)
+
 ## 0.1.0 - 2026-09-10
 Initial release.
 

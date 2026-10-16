@@ -93,6 +93,18 @@ macro_rules! used {
 /// ```
 pub use crate::used as used_for_docs;
 
+/// Mark the specified paths as being used for tests.
+///
+/// Expands to [`used!`] if and only if `#[cfg(not(test))]` is true,
+/// meaning you will get warnings if the code is not actually used in tests.
+#[macro_export]
+macro_rules! used_for_tests {
+    ($($x:tt)*) => {
+        #[cfg(not(test))]
+        $crate::used!($($x)*);
+    }
+}
+
 #[cfg(test)]
 mod test {
     #[test]
