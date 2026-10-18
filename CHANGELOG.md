@@ -24,6 +24,9 @@ Most changes include the relevant [jj](https://jj-vcs.dev) change ids in parens.
   - Support for this will be removed in version v0.2.0
   - Cannot be marked `#[deprecated(...)]` due to macro limitations.
 
+### Fixed
+- Fixed doctests failing on old rust versions by adding `#[allow(unused_extern_crates)]` (qrronrlo)
+
 ## v0.1.1 - 2026-10-16
 Add `used_for_tests!` macro.
 

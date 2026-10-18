@@ -32,6 +32,7 @@
 //!
 //! ```
 //! #![deny(unused)]
+//! # #![allow(unused_extern_crates)]
 //! use core::fmt::Debug;
 //!
 //! struct Foo;
@@ -66,6 +67,7 @@
 /// Accepts a comma-separated list of paths, each prefixed with `use` or `let`:
 /// ```
 /// #![deny(unused)]
+/// # #![allow(unused_extern_crates)]
 /// use core::fmt::Debug;
 ///
 /// struct Foo;
@@ -113,6 +115,7 @@
 /// without giving any warning for the `foo` function being unused.
 /// ```compile_fail
 /// #![deny(unused)]
+/// # #![allow(unused_extern_crates)]
 ///
 /// fn foo() {
 ///     let x = 3;
@@ -191,6 +194,7 @@ pub use crate::used as used_for_docs;
 /// # Example
 /// ```
 /// #![deny(unused)]
+/// # #![allow(unused_extern_crates)]
 ///
 /// struct Foo;
 /// impl Foo {
