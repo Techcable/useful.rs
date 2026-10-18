@@ -12,6 +12,12 @@ Most changes include the relevant [jj](https://jj-vcs.dev) change ids in parens.
 
 ## Unreleased
 
+## v0.1.2 - 2026-10-17
+Support more types of items by using a `let` prefix.
+
+Old behavior available with the `use` prefix.
+Paths without prefixes are deprecated.
+
 ### Added
 - Support associated functions, methods, and constants in `used!` with a `let` prefix, as in `used!(let Foo::new)`. (ymxposuv)
   - These cannot be imported with `use`, so they previously failed with "`Foo` is a struct, not a module".
