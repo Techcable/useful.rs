@@ -21,14 +21,15 @@
 //! ```
 //!
 //! # Prefixes
-//! Each path must be prefixed with either `use` or `let`,
+//! Each item must be prefixed with either `use` or `let`,
 //! which determines how it is marked as used:
 //! - `use path` imports the path, expanding to `use path as _;`.
 //!   This works for anything that can be imported,
 //!   including modules, types, traits, functions, and constants.
-//! - `let path` references the path as a value, expanding to `let _ = path;`.
-//!   This is needed for associated functions, methods, and associated constants,
-//!   because they cannot be imported with `use`.
+//! - `let expr` evaluates an expression, expanding to `let _ = expr;`.
+//!   This is usually just a path, which is needed for associated functions,
+//!   methods, and associated constants, because they cannot be imported with `use`.
+//!   Other expressions are useful for disambiguating generics, such as `let foo("")`.
 //!
 //! ```
 //! #![deny(unused)]
@@ -63,7 +64,8 @@
 /// Mark the specified paths as being used,
 /// avoiding lints for dead code or unused imports.
 ///
-/// Accepts a comma-separated list of paths, each prefixed with `use` or `let`:
+/// Accepts a comma-separated list of paths prefixed with `use`,
+/// or expressions prefixed with `let`:
 /// ```
 /// #![deny(unused)]
 /// # #![allow(unused_extern_crates)]
@@ -89,12 +91,29 @@
 /// This works for anything that can be imported,
 /// including modules, types, traits, functions, and constants.
 ///
-/// ## `let path`
-/// References the path as a value, expanding to `let _ = path;`.
-/// This is needed for associated functions, methods, and associated constants,
-/// because they cannot be imported with `use`.
+/// ## `let expr`
+/// Evaluates an expression, expanding to `let _ = expr;`.
+/// The expression is never actually executed, only type checked.
+///
+/// This is usually just a path, which is needed for associated functions,
+/// methods, and associated constants, because they cannot be imported with `use`.
 ///
 /// Generic functions need explicit type arguments, such as `let Vec::<u8>::new`.
+/// Functions with `impl Trait` arguments cannot be given explicit type arguments,
+/// so call them with constant arguments to assist type inference instead:
+/// ```
+/// #![deny(unused)]
+/// # #![allow(unused_extern_crates)]
+/// use core::fmt::Debug;
+///
+/// fn foo(_x: impl Debug) {}
+/// useful::used!(let foo(""));
+/// ```
+/// Since the call is never executed, the arguments only need to have the right types.
+/// Casting to a function pointer also works, such as `let foo as fn(&'static str)`.
+///
+/// Be careful, because expressions that don't reference anything will
+/// be accepted without marking anything as used, such as `let 1 + 2`.
 ///
 /// # Advantages
 /// This is more precise than applying `#[allow(unused)]` to an item because
@@ -136,7 +155,7 @@ macro_rules! used {
     // Errors are never subject to these attributes,
     // so syntax is checked even if the items are disabled by `#[cfg(...)]`.
     (@with_attrs $attrs:tt @impl) => {};
-    (@with_attrs $attrs:tt @impl let $x:path $(, $($rest:tt)*)?) => {
+    (@with_attrs $attrs:tt @impl let $x:expr $(, $($rest:tt)*)?) => {
         // Before Rust 1.89, the dead code lint ignored the body of `const _`,
         // but it has always treated items with `#[allow(dead_code)]` as used.
         // The block gives each generated function its own scope, avoiding name conflicts.
@@ -191,7 +210,7 @@ macro_rules! used {
 ///
 /// Behaves exactly the same as [`used!`],
 /// but with a different name for clarity of purpose.
-/// Paths should be prefixed with `use` or `let`, as described in [`used!`].
+/// Items should be prefixed with `use` or `let`, as described in [`used!`].
 ///
 /// # Example
 /// ```
@@ -208,7 +227,7 @@ pub use crate::used as used_for_docs;
 ///
 /// Behaves like [`used!`] if and only if `#[cfg(not(test))]` is true,
 /// meaning you will get warnings if the code is not actually used in tests.
-/// Paths should be prefixed with `use` or `let`, as described in [`used!`].
+/// Items should be prefixed with `use` or `let`, as described in [`used!`].
 ///
 /// The syntax is checked even when `#[cfg(test)]` is true.
 ///
