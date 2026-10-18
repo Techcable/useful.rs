@@ -1,4 +1,4 @@
-error: expected a path, optionally prefixed by `let` or `use`, found `1 + 2`
+error: expected a path, prefixed by `let` or `use`, found `1 + 2`
  --> tests/trybuild/fail/not_a_path.rs:1:1
   |
 1 | useful::used!(1 + 2);

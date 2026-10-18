@@ -1,0 +1,7 @@
+error: depending on their type, paths must be prefixed by `let` or `use` (got `Debug`). Support for unprefixed paths was removed in v0.2.0
+ --> tests/trybuild/fail/unprefixed.rs:9:1
+  |
+9 | useful::used!(Debug, HashMap);
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `$crate::used` which comes from the expansion of the macro `useful::used` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -12,6 +12,9 @@ Most changes include the relevant [jj](https://jj-vcs.dev) change ids in parens.
 
 ## Unreleased
 
+### Removed
+- *BREAKING*: Remove support for unprefixed paths, which were deprecated in v0.1.2 (oomoqlml)
+
 ## v0.1.2 - 2026-10-17
 Support more types of items by using a `let` prefix.
 

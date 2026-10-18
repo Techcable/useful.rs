@@ -44,8 +44,7 @@
 //! useful::used!(use Debug, use Foo, let Foo::new);
 //! ```
 //!
-//! Paths without a prefix are deprecated, and are treated as if they were prefixed with `use`.
-//! Support will be removed in v0.2.0. They are not marked `#[deprecated]` due to macro limitations.
+//! Support for paths without a prefix has been removed in v0.2.0.
 //!
 //! # Documentation-Only Imports
 //! Currently, rustc will warn about unused imports if those imports are only used in doc comments.
@@ -81,6 +80,10 @@
 /// ```
 ///
 /// # Prefixes
+/// The prefix determines how each path is marked as used.
+///
+/// Support for unprefixed paths has been removed in v0.2.0.
+///
 /// ## `use path`
 /// Imports the path, expanding to `#[allow(unused)] use path as _;`.
 /// This works for anything that can be imported,
@@ -92,11 +95,6 @@
 /// because they cannot be imported with `use`.
 ///
 /// Generic functions need explicit type arguments, such as `let Vec::<u8>::new`.
-///
-/// ## Unprefixed paths (deprecated)
-/// Paths without a prefix are deprecated,
-/// and are treated as if they were prefixed with `use`.
-/// Support for unprefixed paths will be removed in version v0.2.0.
 ///
 /// # Advantages
 /// This is more precise than applying `#[allow(unused)]` to an item because
@@ -145,17 +143,21 @@ macro_rules! used {
         $($crate::used!(@impl $($rest)*);)?
     };
     (@impl use $x:path $(, $($rest:tt)*)?) => {
-        $crate::used!(@impl $x $(, $($rest)*)?);
-    };
-    (@impl $x:path $(, $($rest:tt)*)?) => {
         #[allow(unused)]
         use $x as _;
         $($crate::used!(@impl $($rest)*);)?
     };
+    (@impl $x:path $(, $($rest:tt)*)?) => {
+        compile_error!(concat!(
+            "depending on their type, paths must be prefixed by `let` or `use` (got `",
+            stringify!($x),
+            "`). Support for unprefixed paths was removed in v0.2.0",
+        ));
+    };
     // must not fall through to the catch-all branch below, which would recurse forever
     (@impl $($invalid:tt)+) => {
         compile_error!(concat!(
-            "expected a path, optionally prefixed by `let` or `use`, found `",
+            "expected a path, prefixed by `let` or `use`, found `",
             stringify!($($invalid)+),
             "`",
         ));

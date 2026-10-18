@@ -52,8 +52,7 @@ impl Foo {
 useful::used!(use Debug, use Foo, let Foo::new);
 ```
 
-Paths without a prefix are deprecated, and are treated as if they were prefixed with `use`.
-Support will be removed in v0.2.0. They are not marked `#[deprecated]` due to macro limitations.
+Support for paths without a prefix has been removed in v0.2.0.
 
 ## Documentation-Only Imports
 Currently, rustc will warn about unused imports if those imports are only used in doc comments.
