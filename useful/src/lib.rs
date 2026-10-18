@@ -129,25 +129,35 @@
 #[macro_export]
 macro_rules! used {
     // implementation detail, which processes one item at a time
-    (@impl) => {};
-    (@impl let $x:path $(, $($rest:tt)*)?) => {
+    //
+    // `$attrs` is a bracketed list of attributes, which is applied to each generated item.
+    // It is forwarded as a single token tree because `$(#[$attr])*`
+    // cannot be repeated inside the `$(...)?` used for recursion.
+    // Errors are never subject to these attributes,
+    // so syntax is checked even if the items are disabled by `#[cfg(...)]`.
+    (@with_attrs $attrs:tt @impl) => {};
+    (@with_attrs $attrs:tt @impl let $x:path $(, $($rest:tt)*)?) => {
         // Before Rust 1.89, the dead code lint ignored the body of `const _`,
         // but it has always treated items with `#[allow(dead_code)]` as used.
         // The block gives each generated function its own scope, avoiding name conflicts.
         {
-            #[allow(unused)]
-            fn __useful_let_used() {
-                let _ = $x;
-            }
+            $crate::used!(@emit $attrs
+                #[allow(unused)]
+                fn __useful_let_used() {
+                    let _ = $x;
+                }
+            );
         }
-        $($crate::used!(@impl $($rest)*);)?
+        $($crate::used!(@with_attrs $attrs @impl $($rest)*);)?
     };
-    (@impl use $x:path $(, $($rest:tt)*)?) => {
-        #[allow(unused)]
-        use $x as _;
-        $($crate::used!(@impl $($rest)*);)?
+    (@with_attrs $attrs:tt @impl use $x:path $(, $($rest:tt)*)?) => {
+        $crate::used!(@emit $attrs
+            #[allow(unused)]
+            use $x as _;
+        );
+        $($crate::used!(@with_attrs $attrs @impl $($rest)*);)?
     };
-    (@impl $x:path $(, $($rest:tt)*)?) => {
+    (@with_attrs $attrs:tt @impl $x:path $(, $($rest:tt)*)?) => {
         compile_error!(concat!(
             "depending on their type, paths must be prefixed by `let` or `use` (got `",
             stringify!($x),
@@ -155,18 +165,25 @@ macro_rules! used {
         ));
     };
     // must not fall through to the catch-all branch below, which would recurse forever
-    (@impl $($invalid:tt)+) => {
+    (@with_attrs $attrs:tt @impl $($invalid:tt)+) => {
         compile_error!(concat!(
             "expected a path, prefixed by `let` or `use`, found `",
             stringify!($($invalid)+),
             "`",
         ));
     };
-    () => {};
-    ($($items:tt)+) => {
+    (@emit [$(#[$attr:meta])*] $item:item) => {
+        $(#[$attr])*
+        $item
+    };
+    (@with_attrs $attrs:tt) => {};
+    (@with_attrs $attrs:tt $($items:tt)+) => {
         const _: () = {
-            $crate::used!(@impl $($items)+);
+            $crate::used!(@with_attrs $attrs @impl $($items)+);
         };
+    };
+    ($($items:tt)*) => {
+        $crate::used!(@with_attrs [] $($items)*);
     };
 }
 
@@ -189,9 +206,11 @@ pub use crate::used as used_for_docs;
 
 /// Mark the specified paths as being used for tests.
 ///
-/// Expands to [`used!`] if and only if `#[cfg(not(test))]` is true,
+/// Behaves like [`used!`] if and only if `#[cfg(not(test))]` is true,
 /// meaning you will get warnings if the code is not actually used in tests.
 /// Paths should be prefixed with `use` or `let`, as described in [`used!`].
+///
+/// The syntax is checked even when `#[cfg(test)]` is true.
 ///
 /// # Example
 /// ```
@@ -211,9 +230,10 @@ pub use crate::used as used_for_docs;
 #[macro_export]
 macro_rules! used_for_tests {
     ($($x:tt)*) => {
-        #[cfg(not(test))]
-        $crate::used!($($x)*);
-    }
+        // The `cfg` must not be applied to the macro invocation,
+        // because then the input would never be checked when `cfg(test)` is set.
+        $crate::used!(@with_attrs [#[cfg(not(test))]] $($x)*);
+    };
 }
 
 #[cfg(test)]

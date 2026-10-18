@@ -15,6 +15,9 @@ Most changes include the relevant [jj](https://jj-vcs.dev) change ids in parens.
 ### Removed
 - *BREAKING*: Remove support for unprefixed paths, which were deprecated in v0.1.2 (oomoqlml)
 
+### Fixed
+- `used_for_tests!` now checks its input when `cfg(test)` is set, instead of silently accepting invalid syntax. (qknypvko)
+
 ## v0.1.2 - 2026-10-17
 Support more types of items by using a `let` prefix.
 
