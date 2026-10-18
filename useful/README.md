@@ -30,14 +30,15 @@ useful::used!(use foo);
 ```
 
 ## Prefixes
-Each path must be prefixed with either `use` or `let`,
+Each item must be prefixed with either `use` or `let`,
 which determines how it is marked as used:
 - `use path` imports the path, expanding to `use path as _;`.
   This works for anything that can be imported,
   including modules, types, traits, functions, and constants.
-- `let path` references the path as a value, expanding to `let _ = path;`.
-  This is needed for associated functions, methods, and associated constants,
-  because they cannot be imported with `use`.
+- `let expr` evaluates an expression, expanding to `let _ = expr;`.
+  This is usually just a path, which is needed for associated functions,
+  methods, and associated constants, because they cannot be imported with `use`.
+  Other expressions are useful for disambiguating generics, such as `let foo("")`.
 
 ```rust
 #![deny(unused)]
