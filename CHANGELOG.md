@@ -14,6 +14,7 @@ Most changes include the relevant [jj](https://jj-vcs.dev) change ids in parens.
 
 ### Added
 - Accept arbitrary expressions after `let`, such as `let foo("")` to assist inference for functions with `impl Trait` arguments (zvosmzmq)
+- Allow paths without a prefix in `used_for_docs!`, which are treated as `use path` (ztvxmmoo)
 
 ## v0.2.0 - 2026-10-17
 Remove support for unprefixed paths.

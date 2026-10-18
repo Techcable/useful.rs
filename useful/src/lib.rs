@@ -50,11 +50,12 @@
 //! # Documentation-Only Imports
 //! Currently, rustc will warn about unused imports if those imports are only used in doc comments.
 //! This can be worked around by using the [`used_for_docs!`] macro.
-//! It works exactly the same as [`used!`], but it is clearer why you are using it.
+//! It works the same as [`used!`], but it is clearer why you are using it.
+//! Since these are almost always imports, the `use` prefix is optional.
 //! ```
 //! #![deny(unused_imports)]
 //! use std::collections::HashMap;
-//! useful::used_for_docs!(use HashMap);
+//! useful::used_for_docs!(HashMap);
 //!
 //! /// This is almost as awesome as a [`HashMap`]
 //! struct AwesomeStruct(u32, u32);
@@ -208,20 +209,51 @@ macro_rules! used {
 
 /// Mark the specified paths as being used for documentation comments.
 ///
-/// Behaves exactly the same as [`used!`],
+/// Behaves the same as [`used!`],
 /// but with a different name for clarity of purpose.
-/// Items should be prefixed with `use` or `let`, as described in [`used!`].
+///
+/// Unlike [`used!`], paths without a prefix are accepted and treated as `use path`,
+/// because documentation links only ever need imports.
+/// The `use` and `let` prefixes are also accepted, as described in [`used!`].
 ///
 /// # Example
 /// ```
 /// #![deny(unused_imports)]
+/// use core::fmt::Display;
 /// use std::collections::HashMap;
-/// useful::used_for_docs!(use HashMap);
+/// useful::used_for_docs!(HashMap, use Display);
 ///
-/// /// This is almost as awesome as a [`HashMap`]
+/// /// This is almost as awesome as a [`HashMap`], but doesn't implement [`Display`].
 /// struct AwesomeStruct(u32, u32);
 /// ```
-pub use crate::used as used_for_docs;
+#[macro_export]
+macro_rules! used_for_docs {
+    // implementation detail, which prefixes each path with `use` if it has no prefix
+    //
+    // `$done` is a bracketed list of the items which have already been processed.
+    (@impl [$($done:tt)*]) => {
+        $crate::used!($($done)*);
+    };
+    (@impl [$($done:tt)*] use $x:path $(, $($rest:tt)*)?) => {
+        $crate::used_for_docs!(@impl [$($done)* use $x,] $($($rest)*)?);
+    };
+    (@impl [$($done:tt)*] let $x:expr $(, $($rest:tt)*)?) => {
+        $crate::used_for_docs!(@impl [$($done)* let $x,] $($($rest)*)?);
+    };
+    (@impl [$($done:tt)*] $x:path $(, $($rest:tt)*)?) => {
+        $crate::used_for_docs!(@impl [$($done)* use $x,] $($($rest)*)?);
+    };
+    (@impl [$($done:tt)*] $($invalid:tt)+) => {
+        compile_error!(concat!(
+            "expected a path, optionally prefixed by `use` or `let`, found `",
+            stringify!($($invalid)+),
+            "`",
+        ));
+    };
+    ($($items:tt)*) => {
+        $crate::used_for_docs!(@impl [] $($items)*);
+    };
+}
 
 /// Mark the specified paths as being used for tests.
 ///
