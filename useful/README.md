@@ -57,12 +57,13 @@ Support for paths without a prefix has been removed in v0.2.0.
 
 ## Documentation-Only Imports
 Currently, rustc will warn about unused imports if those imports are only used in doc comments.
-This can be worked around by using the [`used_for_docs!`](https://docs.rs/useful/latest/useful/macro.used.html) macro.
-It works exactly the same as [`used!`](https://docs.rs/useful/latest/useful/macro.used.html), but it is clearer why you are using it.
+This can be worked around by using the [`used_for_docs!`](https://docs.rs/useful/latest/useful/macro.used_for_docs.html) macro.
+It works the same as [`used!`](https://docs.rs/useful/latest/useful/macro.used.html), but it is clearer why you are using it.
+Since these are almost always imports, the `use` prefix is optional.
 ```rust
 #![deny(unused_imports)]
 use std::collections::HashMap;
-useful::used_for_docs!(use HashMap);
+useful::used_for_docs!(HashMap);
 
 /// This is almost as awesome as a [`HashMap`]
 struct AwesomeStruct(u32, u32);

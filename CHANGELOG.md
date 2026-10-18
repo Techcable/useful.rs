@@ -15,7 +15,11 @@ Most changes include the relevant [jj](https://jj-vcs.dev) change ids in parens.
 ### Added
 - Accept arbitrary expressions after `let`, such as `let foo("")` to assist inference for functions with `impl Trait` arguments (zvosmzmq)
   - Fixes [issue #3]
+- Allow paths without a prefix in `used_for_docs!`, which are treated as `use path` (ztvxmmoo)
+  - Unprefixed paths are still forbidden in `used!`.
+  - The exception was made because rustdocs almost always need imports ([issue #1])
 
+[issue #1]: https://github.com/Techcable/useful.rs/issues/1
 [issue #3]: https://github.com/Techcable/useful.rs/issues/3
 
 ## v0.2.0 - 2026-10-17

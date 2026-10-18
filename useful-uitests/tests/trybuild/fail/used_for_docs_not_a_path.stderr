@@ -1,0 +1,7 @@
+error: expected a path, optionally prefixed by `use` or `let`, found `1 + 2`
+ --> tests/trybuild/fail/used_for_docs_not_a_path.rs:1:1
+  |
+1 | useful::used_for_docs!(1 + 2);
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `$crate::used_for_docs` which comes from the expansion of the macro `useful::used_for_docs` (in Nightly builds, run with -Z macro-backtrace for more info)
