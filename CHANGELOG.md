@@ -12,6 +12,9 @@ Most changes include the relevant [jj](https://jj-vcs.dev) change ids in parens.
 
 ## Unreleased
 
+## v0.2.0 - 2026-10-17
+Remove support for unprefixed paths.
+
 ### Removed
 - *BREAKING*: Remove support for unprefixed paths, which were deprecated in v0.1.2 (oomoqlml)
 
