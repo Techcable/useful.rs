@@ -12,6 +12,12 @@ Most changes include the relevant [jj](https://jj-vcs.dev) change ids in parens.
 
 ## Unreleased
 
+## v0.2.1 - 2026-10-18
+Accept arbitrary expressions after `let`.
+
+This makes it possible to disambiguate functions using `impl Trait` params,
+as they can't accept ordinary generic parameters.
+
 ### Added
 - Accept arbitrary expressions after `let`, such as `let foo("")` to assist inference for functions with `impl Trait` arguments (zvosmzmq)
   - Fixes [issue #3]
