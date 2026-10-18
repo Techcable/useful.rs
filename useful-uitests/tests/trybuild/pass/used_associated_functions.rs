@@ -11,7 +11,7 @@ impl<T> Foo<T> {
     }
 }
 fn bar() {}
-useful::used!(let Foo::<()>::new, bar, let Foo::<()>::get, let Foo::<()>::BAR,);
+useful::used!(let Foo::<()>::new, use bar, let Foo::<()>::get, let Foo::<()>::BAR,);
 useful::used_for_tests!(let Foo::<u32>::new);
 
 fn main() {}

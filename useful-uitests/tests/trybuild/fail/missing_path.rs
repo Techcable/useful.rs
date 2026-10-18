@@ -1,3 +1,3 @@
-useful::used!(does_not_exist);
+useful::used!(use does_not_exist);
 
 fn main() {}

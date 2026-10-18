@@ -6,6 +6,6 @@
 #![forbid(unused)]
 
 fn foo() {}
-useful::used!(foo);
+useful::used!(use foo);
 
 fn main() {}

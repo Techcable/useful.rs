@@ -4,8 +4,8 @@ error: allow(unused) incompatible with previous forbid
 6 | #![forbid(unused)]
   |           ------ `forbid` level set here
 ...
-9 | useful::used!(foo);
-  | ^^^^^^^^^^^^^^^^^^ overruled by previous forbid
+9 | useful::used!(use foo);
+  | ^^^^^^^^^^^^^^^^^^^^^^ overruled by previous forbid
   |
   = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
   = note: for more information, see issue #81670 <https://github.com/rust-lang/rust/issues/81670>

@@ -1,9 +1,9 @@
 error[E0432]: unresolved import `does_not_exist`
  --> tests/trybuild/fail/missing_path.rs:1:1
   |
-1 | useful::used!(does_not_exist);
-  | ^^^^^^^^^^^^^^--------------^
-  |               |
-  |               no external crate `does_not_exist`
+1 | useful::used!(use does_not_exist);
+  | ^^^^^^^^^^^^^^^^^^--------------^
+  |                   |
+  |                   no external crate `does_not_exist`
   |
   = note: this error originates in the macro `$crate::used` which comes from the expansion of the macro `useful::used` (in Nightly builds, run with -Z macro-backtrace for more info)

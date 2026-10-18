@@ -4,6 +4,6 @@
 fn foo() {
     let x = 3;
 }
-useful::used!(foo);
+useful::used!(use foo);
 
 fn main() {}

@@ -9,6 +9,6 @@ impl Bar {
         Bar
     }
 }
-useful::used!(use Debug, let Bar::new, Hash, use foo,);
+useful::used!(use Debug, let Bar::new, use Hash, use foo,);
 
 fn main() {}
